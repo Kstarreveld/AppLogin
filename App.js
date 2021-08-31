@@ -1,15 +1,48 @@
 import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, {useState} from 'react';
+import { StyleSheet, Text, View, TextInput, Button, SafeAreaView} from 'react-native';
+
+const Login = (props) => {
+      return <View>
+        <Text style={{fontSize:20}}>Login</Text>
+        <TextInput placeholder="Naam"></TextInput>
+        <TextInput placeholder="Wachtwoord" secureTextEntry="true"></TextInput>
+        <Button title="login" onPress={props.onLogin}></Button>
+        </View>;
+}
+const SecurePage = (props) =>
+{
+  return  <View>
+    <Text>Wel ingelogd</Text>
+    <Button title="Logout" onPress={props.onLogout}></Button>
+    </View>;
+}
+
 
 export default function App() {
+  const [authenticated, setAuthenticated] = useState(false);
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <SafeAreaView style={styles.container}>
+      {
+       authenticated? <SecurePage onLogout={ () => setAuthenticated(false) }/>  :
+                 <Login onLogin= { ()=> {
+                        setAuthenticated(true)
+                 }}/>
+      }
+      
+    </SafeAreaView>
   );
 }
+
+
+
+
+
+
+
+
+
 
 const styles = StyleSheet.create({
   container: {
