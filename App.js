@@ -1,11 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
 import React, {useState} from 'react';
 import { StyleSheet, Text, View, TextInput, Button, SafeAreaView} from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
+const Stack = createNativeStackNavigator();
 
 const checkUser = (username, passwordhash, login)=>
 {
-  console.log("before fetch");
   fetch('http://localhost/loginapp/user.php', 
   {
         method: 'post',
@@ -32,7 +34,7 @@ const checkUser = (username, passwordhash, login)=>
 }
 
 
-const Login = (props) => {
+const Login = ({navigation, route}) => {
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
 
@@ -46,7 +48,8 @@ const Login = (props) => {
               ></TextInput>
          
           <Button title="login" onPress={() => {
-             checkUser(user, password, props.onLogin);  
+            console.log("dit is de inhoud" + route);
+             checkUser(user, password, route.params.onLogin);  
 
           }
         }
@@ -54,11 +57,11 @@ const Login = (props) => {
         ></Button>
         </View>;
 }
-const SecurePage = (props) =>
+const SecurePage = ({navigation,route}) =>
 {
   return  <View>
-    <Text>Wel ingelogd {props.username}</Text>
-    <Button title="Logout" onPress={props.onLogout}></Button>
+    <Text>Wel ingelogd {route.params.username}</Text>
+    <Button title="Logout" onPress={route.params.onLogout}></Button>
     </View>;
 }
 
@@ -68,16 +71,37 @@ export default function App() {
   const [user, setUser]= useState('');
 
   return (
-    <SafeAreaView style={styles.container}>
-      {
-       authenticated? <SecurePage username={user} onLogout={ () => setAuthenticated(false) }/>  :
-                 <Login onLogin= { (user)=> {
-                        setAuthenticated(true);
-                        setUser(user);
-                 }}/>
-      }
-      
-    </SafeAreaView>
+    <NavigationContainer>
+    <Stack.Navigator>
+      {authenticated == false ? (
+      // No token found, user isn't signed in
+          <Stack.Screen
+            name="SignIn"
+            component={Login}
+            options={{
+              title: 'Sign in'
+              // When logging out, a pop animation feels intuitive
+              // You can remove this if you want the default 'push' animation
+              //animationTypeForReplace: state.isSignout ? 'pop' : 'push',
+             }}
+             initialParams={
+              {
+                username:user ,
+                onLogin: (user) =>{setUser(user); setAuthenticated(true)}
+              }
+            }
+          />
+        ) : (
+          // User is signed in
+          <Stack.Screen name="Home" component={SecurePage} 
+          initialParams={
+            {username:user ,
+            onLogout: () =>{ setAuthenticated(false) }}
+          }
+         />
+        )}
+      </Stack.Navigator>
+      </NavigationContainer>
   );
 }
 
