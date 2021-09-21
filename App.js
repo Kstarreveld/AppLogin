@@ -3,12 +3,15 @@ import React, {useState} from 'react';
 import { StyleSheet, Text, View, TextInput, Button, SafeAreaView} from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
+const Tab = createBottomTabNavigator();
 
 const Stack = createNativeStackNavigator();
 
 const checkUser = (username, passwordhash, login)=>
 {
-  fetch('http://localhost/loginapp/user.php', 
+  fetch('http://localhost/api/user.php', 
   {
         method: 'post',
         headers:
@@ -64,18 +67,29 @@ const SecurePage = ({navigation,route}) =>
     <Button title="Logout" onPress={route.params.onLogout}></Button>
     </View>;
 }
-
-
+const HomeScreen = ({navigation,route}) =>
+{
+  return  <View>
+    <Text> WELCOME HOME</Text>
+    </View>;
+}
+const SettingsScreen = ({navigation,route}) =>
+{
+  return  <View>
+    <Text>Settings, please change</Text>
+    </View>;
+}
 export default function App() {
   const [authenticated, setAuthenticated] = useState(false);
   const [user, setUser]= useState('');
 
   return (
     <NavigationContainer>
-    <Stack.Navigator>
+       <Tab.Navigator>
+  
       {authenticated == false ? (
       // No token found, user isn't signed in
-          <Stack.Screen
+          <Tab.Screen
             name="SignIn"
             component={Login}
             options={{
@@ -93,14 +107,16 @@ export default function App() {
           />
         ) : (
           // User is signed in
-          <Stack.Screen name="Home" component={SecurePage} 
+          <Tab.Screen name="Home" component={SecurePage} 
           initialParams={
             {username:user ,
             onLogout: () =>{ setAuthenticated(false) }}
           }
          />
         )}
-      </Stack.Navigator>
+         <Tab.Screen name="Home" component={HomeScreen} />
+        <Tab.Screen name="Settings" component={SettingsScreen} />
+      </Tab.Navigator>
       </NavigationContainer>
   );
 }
